@@ -1,0 +1,16 @@
+language: python
+python:
+- 3.8
+
+env:
+  PYPI_TOKEN:
+    secure: pxJjwbqzIOtNy2yq9eaRniq9raoKXRQaEZXu9OM4Xt0RFQGAdRlVhGjg98ez2jy715np3pDMExaYIkRbRX0XFYhezzZ9s1vn00nNwMqcycHduLJ+7Yv3+Xes/sTtr4fH4B6LySPtrF8Vbaw07ncjK31maUmBzS+U0SgvrEQqzifxyS9FElALdWOf2KJ3ehVMhkugtpw3ayzvawDgE+ZFJWImVGI6ueyNT5czoM3uU0AOJZKuUcmlyhWoQbgvrsBAISbWPfbDYzqSuJGNvul6/xWbxuBv8A89y6a8fcXha0/4lFiQy0f0XVyF/huHkmReYF44+Q1z+4EDx/TKVIDWXCau1pgPn+tnEgKbm9olQRjsscB0Y3tocElxbWm3fvkGD3EdJv0iTEDAlIZyFYL4uu0mMSZPHZKjE4pZo+y8W4cKt3xcs/e7La5spsvAU13CvYZhXQ/M32hXFIkSZysqamYx8OwVwZR9vOiF1aVzeKB6hs7u+eMfNsZURAKFXMHVuaF8jDYJ/S6y9lguTVFnokK4slHJZVVMYzG3I7RcQOoq4GFye95OKi1FNdOqhkig46LyqNtF4CEeX1jCny+2g2dEgRobpz9pOef7hfaKImaNEviy5J7+X7a2+m1jaELGWjsmw2UBZUZeSUOc5+WCEB1ac8AdYDucPcpJiLNvhBE=
+
+script:
+- pip install twine pytest
+- pip install -e .
+- pytest -s
+- python setup.py sdist bdist_wheel
+- twine check dist/*
+- if [ "$TRAVIS_BRANCH" = "main" ]; then twine upload --skip-existing dist/* -u __token__
+  -p $PYPI_TOKEN; fi
