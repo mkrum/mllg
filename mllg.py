@@ -28,6 +28,10 @@ class LogWriter:
         info.dump(self.log_file)
         self.log_file.flush()
 
+    def log_str(self, value_str):
+        self.log_file.write(value_str + '\n')
+        self.log_file.flush()
+
     def checkpoint(self, epoch, batch_idx, model):
         checkpoint_path = f"{self.log_path}/model_{epoch}.pth"
         torch.save(model.state_dict(), checkpoint_path)
@@ -94,7 +98,7 @@ class BasicLogger:
         self.losses = deque(maxlen=100)
 
     def handle(self, data):
-        if data["type"] == "train_info":
+        if data.get("type", "") == "train_info":
             epoch = data["epoch"]
             batch_idx = data["batch_idx"]
 
@@ -103,7 +107,7 @@ class BasicLogger:
 
             print(f"({epoch:03} {batch_idx:04}) {loss_val:.2f}", end="\r")
 
-        elif data["type"] == "val_info":
+        elif data.get("type", "") == "val_info":
             epoch = data["epoch"]
             batch_num = data["batch_idx"]
 
@@ -115,6 +119,8 @@ class BasicLogger:
                 val_str += f"{loss_type}: {loss_val} "
             print()
             print(val_str)
+        elif data.get("type", "") == "config":
+            print(data)
 
 
 def log_worker(log_path):
