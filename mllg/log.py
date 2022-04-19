@@ -26,6 +26,10 @@ class LogWriter:
         info.dump(self.log_file)
         self.log_file.flush()
 
+    def log_str(self, log_str):
+        self.log_file.write(log_str + "\n")
+        self.log_file.flush()
+
     def checkpoint(self, epoch, batch_idx, model):
         checkpoint_path = f"{self.log_path}/model_{epoch}.pth"
         torch.save(model.state_dict(), checkpoint_path)
