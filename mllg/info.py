@@ -10,7 +10,14 @@ class TestInfo:
     time: float = 0
 
     def __post_init__(self):
-        super().__setattr__("time", time.time())
+        
+        # TODO: This is very bad
+        if self.time == 0:
+            super().__setattr__("time", time.time())
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(loss_type=data['loss_type'], loss=data['loss'], time=data['time'])
 
     def __str__(self):
         dict_val = asdict(self)
@@ -29,7 +36,13 @@ class ValidationInfo:
     time: float = 0
 
     def __post_init__(self):
-        super().__setattr__("time", time.time())
+        if self.time == 0:
+            super().__setattr__("time", time.time())
+
+    @classmethod
+    def from_dict(cls, data):
+        losses = [TestInfo.from_dict(l) for l in data['losses']]
+        return cls(epoch=data['epoch'], batch_idx=data['batch_idx'],  losses=losses, time=data['time'])
 
     def __str__(self):
         dict_val = asdict(self)
@@ -48,7 +61,12 @@ class TrainInfo:
     time: float = 0
 
     def __post_init__(self):
-        super().__setattr__("time", time.time())
+        if self.time == 0:
+            super().__setattr__("time", time.time())
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(epoch=data['epoch'], batch_idx=data['batch_idx'], loss=data['loss'], time=data['time'])
 
     def __str__(self):
         dict_val = asdict(self)
