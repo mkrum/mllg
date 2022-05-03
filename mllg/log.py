@@ -14,13 +14,14 @@ class LogWriter:
     checkpoints.
     """
 
-    def __init__(self, log_path):
+    def __init__(self, log_path, log_proc=True):
         os.makedirs(log_path, exist_ok=True)
         self.log_path = log_path
         self.log_file_path = f"{log_path}/train.log"
         self.log_file = open(self.log_file_path, "w")
-
-        spawn_logger_worker(self.log_file_path)
+        
+        if log_proc:
+            spawn_logger_worker(self.log_file_path)
 
     def log_info(self, info):
         info.dump(self.log_file)
