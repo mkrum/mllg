@@ -7,36 +7,7 @@ import multiprocessing as mp
 import torch
 import numpy as np
 
-
-class LogWriter:
-    """
-    Class used for the main process to coordinate writing to log file/saving
-    checkpoints.
-    """
-
-    def __init__(self, log_path, log_proc=True):
-        os.makedirs(log_path, exist_ok=True)
-        self.log_path = log_path
-        self.log_file_path = f"{log_path}/train.log"
-        self.log_file = open(self.log_file_path, "w")
-        
-        if log_proc:
-            spawn_logger_worker(self.log_file_path)
-
-    def log_info(self, info):
-        info.dump(self.log_file)
-        self.log_file.flush()
-
-    def log_str(self, log_str):
-        self.log_file.write(log_str + "\n")
-        self.log_file.flush()
-
-    def checkpoint(self, epoch, batch_idx, model):
-        checkpoint_path = f"{self.log_path}/model_{epoch}.pth"
-        torch.save(model.state_dict(), checkpoint_path)
-
-
-class BasicLogger:
+class BasicDisplay:
     def __init__(self):
         self.losses = deque(maxlen=100)
 
@@ -64,9 +35,38 @@ class BasicLogger:
             print(val_str)
 
 
-def log_worker(log_path):
+class LogWriter:
+    """
+    Class used for the main process to coordinate writing to log file/saving
+    checkpoints.
+    """
 
-    logger = BasicLogger()
+    def __init__(self, log_path, log_proc=True, display=BasicDisplay):
+        os.makedirs(log_path, exist_ok=True)
+        self.log_path = log_path
+        self.log_file_path = f"{log_path}/train.log"
+        self.log_file = open(self.log_file_path, "w")
+        
+        if log_proc:
+            spawn_logger_worker(display, self.log_file_path)
+
+    def log_info(self, info):
+        info.dump(self.log_file)
+        self.log_file.flush()
+
+    def log_str(self, log_str):
+        self.log_file.write(log_str + "\n")
+        self.log_file.flush()
+
+    def checkpoint(self, epoch, batch_idx, model):
+        checkpoint_path = f"{self.log_path}/model_{epoch}.pth"
+        torch.save(model.state_dict(), checkpoint_path)
+
+
+
+def log_worker(display_type, log_path):
+
+    logger = display_type()
 
     file_obj = open(log_path, "r")
 
@@ -85,7 +85,7 @@ def log_worker(log_path):
                 logger.handle(new_data)
 
 
-def spawn_logger_worker(log_path):
-    p = mp.Process(target=log_worker, args=(log_path,))
+def spawn_logger_worker(display_type, log_path):
+    p = mp.Process(target=log_worker, args=(display_type, log_path,))
     p.daemon = True
     p.start()
